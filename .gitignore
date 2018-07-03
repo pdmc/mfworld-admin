@@ -7,3 +7,5 @@ themes/classic/views/
 
 /runtime/
 /nbproject/
+config.php
+database.php
