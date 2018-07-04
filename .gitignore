@@ -1,7 +1,0 @@
-/runtime/
-/nbproject/
-/admin/config.php
-/admin/database.php
-/public/uploads/
-/thinkphp/*
-/vendor/*
