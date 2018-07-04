@@ -1,0 +1,96 @@
+{extend name="extra@main"/}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">竞猜</a>
+            <a href="{:url('Guessing/lists')}">竞猜列表</a>
+            <a><cite>编辑竞猜</cite></a>
+        </span>
+    </div>
+    <form class="layui-form layui-form-pane1" method="post" action="{:url('editGuess')}" style="width:700px;" enctype="multipart/form-data">
+        <table class="layui-table" style="margin:16px 0px 0px 160px">
+            <tbody>
+                <tr>
+                    <td><span style="color:red">*</span>竞猜类型:</td>
+                    <td>
+                        <select name="cate_id" lay-verify="required">
+                            {volist name="cateList" id="vo"}
+                                <option value="{$vo.id}"   {eq name="$vo.id"  value="$data.cate_id" }selected{/eq}>{$vo.level|str_repeat='&nbsp;&nbsp;&nbsp;',###}{$vo.name}</option>
+                            {/volist}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>竞猜标题:</td>
+                    <td>
+                        <textarea rows="3" cols="70" name="title" lay-verify="required">{$data.title}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>选&nbsp &nbsp &nbsp项A:</td>
+                    <td>
+                        <input type="text"  name="option_one" autocomplete="off" placeholder="选项A" value="{$data.option_one}"  lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>选&nbsp &nbsp &nbsp项B:</td>
+                    <td>
+                        <input type="text"  name="option_two" autocomplete="off" placeholder="选项B"  value="{$data.option_two}"  lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>截止时间:</td>
+                    <td>
+                        <input type="text" name="close_time" autocomplete="off" placeholder="年-月-日 时:分:秒"  value="{$data.close_time|date='Y-m-d H:i:s',###}" lay-verify="required" onclick="layui.laydate({elem: this, istime: true,format: 'YYYY-MM-DD hh:mm:ss'})" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>下注单位:</td>
+                    <td>
+                        <input type="text"  name="size" autocomplete="off"  placeholder="设置下注单位"  value="{$data.size}" lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>平台比例:</td>
+                    <td>
+                        <input type="text"  name="seller_proportion" autocomplete="off"  placeholder="平台抽成比例(如:0.12相当于12%)" value="{$data.seller_proportion}"  lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td>最大金额:</td>
+                    <td>
+                        <input type="text"  name="max" autocomplete="off"  placeholder="下注最大金额"  value="{$data.max}" class="layui-input">
+                    </td>
+                </tr>
+                <!--<tr>
+                    <td>注&nbsp &nbsp &nbsp &nbsp释:</td>
+                    <td>
+                        <textarea rows="2" cols="60" name="remark"></textarea>
+                    </td>
+                </tr>-->
+                <tr>
+                    <td>排&nbsp &nbsp &nbsp &nbsp序:</td>
+                    <td>
+                        <input type="text"  name="sort" autocomplete="off" placeholder="排序" value='{$data.sort}' class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2' style="text-align: center;">  
+                        <input type='hidden' name='id' value='{$data.id}'>
+                        <button class="layui-btn" lay-submit="" lay-filter="demo1">提交</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+{/block}
+
+{block name="optJS"}
+    <script> 
+        layui.use('layer', function() {
+            layui.use(['form', 'jquery', 'laypage','laydate'], function() {
+                var $ = layui.jquery, layer = layui.layer,form = layui.form();
+            });
+        });
+    </script>
+{/block}

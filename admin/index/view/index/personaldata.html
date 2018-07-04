@@ -1,0 +1,131 @@
+{extend name='extra@main' /}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">首页</a>
+            <a><cite>个人中心</cite></a>
+        </span>
+    </div>
+    <div style="float:right;">
+        {php}
+            if(showHandle('index/Index/editpwd')){
+        {/php}
+            <span class="layui-btn editpwd"><i class="layui-icon">&#xe642;</i>修改密码</span>
+        {php}
+            }
+        {/php}
+    </div>
+    <table class="layui-table" style="margin-top:50px;">
+        <colgroup>
+            <col width="50">
+            <col width="150">
+        </colgroup>
+        <tbody>
+            <tr>
+                <td>姓名:</td>
+                <td>{$data.user_name}</td>
+            </tr>
+            <tr>
+                <td>用户名:</td>
+                <td>{$data.nick_name}</td>
+            </tr>
+            <tr>
+                <td>联系方式:</td>
+                <td>{$data.mobile}</td>
+            </tr>
+            <tr>
+                <td>管理员:</td>
+                <td>
+                    <input type="radio" disabled="" {eq name="data.type" value="2"} checked=""{/eq}/>超级&nbsp &nbsp
+                    <input type="radio" disabled="" {eq name="data.type" value="1"} checked=""{/eq} />普通
+                </td>
+            </tr>
+            <tr>
+                <td>开户时间:</td>
+                <td>{$data.create_time|date="Y年m月d日 H时i分s秒",###}</td>
+            </tr>
+        </tbody>
+    </table>
+{/block}
+
+{block name="layer"}
+    <!--修改密码start-->
+    <div id='editPassword' style="display:none">
+        <form id='editForm' class="layui-form" method="post" enctype="multipart/form-data">
+            <table class="layui-table">
+                <tbody>
+                    <tr>
+                        <td>
+                            原密码
+                        </td>
+                        <td>
+                            <input type="text"  name="oldPassword" required  lay-verify="required" placeholder="原密码"  autocomplete="off" class="layui-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            新密码
+                        </td>
+                        <td>
+                            <input type="text"  name="newPassword" required  lay-verify="required" placeholder="新密码" autocomplete="off" class="layui-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan='2' style="text-align: center;">  
+                          <button class="layui-btn editSubmit" lay-submit  type="button">立即提交</button>
+                          <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <!--修改密码end-->
+{/block}
+
+{block name="optJS"}
+<script> 
+    layui.use('layer', function() {
+        layui.use(['form', 'jquery', 'laypage'], function() {
+            var $ = layui.jquery,layer = layui.layer;
+            //修改密码
+            $('.editpwd').click(function(){
+                layer.open({
+                    closeBtn: 2,
+                    type: 1, 
+                    area: '500px',
+                    title:'修改密码',
+                    content: $('#editPassword')
+                });
+            });
+            $('.editSubmit').click(function(){
+                layer.open({
+                    type:3,
+                    success: function(layero, index){ 
+                        var oldpw = $('#editForm input[name="oldPassword"]').val();
+                        var newpw = $('#editForm input[name="newPassword"]').val();
+                        $.ajax({
+                            url:"{:url('editpwd')}",
+                            type:'post',
+                            data:{'oldpw':oldpw,'newpw':newpw},
+                            success:function(d){
+                                var result = eval("(" + d + ")");
+                                if (result.flag == 1) {
+                                    layer.msg(result.msg,{icon:1,time:2000},function(){
+                                        layer.closeAll(); //疯狂模式，关闭所有层
+                                        window.location.reload();//刷新当前页面.
+                                    });
+                                }else{
+                                    layer.msg(result.msg,{icon:1,time:2000},function(){
+                                        layer.closeAll('loading'); //关闭加载层
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
+{/block}

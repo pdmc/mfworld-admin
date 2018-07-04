@@ -1,0 +1,420 @@
+{extend name="extra@main"/}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">分类</a>
+            <a><cite>分类列表</cite></a>
+        </span>
+    </div>
+    <div style="float:right;">
+        {php}
+            if(showHandle('cate/Cate/addCate')){
+        {/php}
+            <span class="layui-btn addCate" style="margin-bottom:5px;">添加分类</span>
+        {php}
+            }
+        {/php}
+    </div>
+    <table lay-even class="layui-table" style="margin-top:-16px;">
+        <thead>
+            <tr> 
+                <th style='width:5%;'>ID</th>
+                <th style='width:14%;'>分类名称</th>
+                <th style='width:10%;'>父类名称</th>
+                <th style='width:6%;'>排序</th>
+                <th style='width:10%;'>(后台)状态</th>
+                <th style='width:10%;'>(前台)状态</th>
+                <th style='width:15%;'>创建时间</th>
+                <th style='width:10%;'>操作</th>
+            </tr> 
+        </thead>
+        <tbody>
+            {volist name="list" id="vo"}
+                <tr data-id="{$vo.pid}" {gt name="vo.level" value="1"} style="display: none;" {/gt}>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.level|str_repeat='&nbsp;&nbsp;&nbsp;',###}
+                        {lt name="$vo.level" value="1"}
+                            <span class="layui-icon unfold" data-id="{$vo.id}" style="cursor:pointer">&#xe61a;</span>
+                        {/lt}
+                        {egt name="$vo.level" value="1"}
+                            <span class="layui-icon unfold" data-id="{$vo.id}" style="cursor:pointer">&#xe602;</span>
+                        {/egt}
+                        {$vo.name}
+                    </td>
+                    <td>{$keyval[$vo.pid]}</td>
+                    <td>{$vo.sort}</td>
+                    <td>
+                        {php}
+                            if(showHandle('cate/Cate/onOffCate')){
+                        {/php}
+                            {neq name="$vo.status" value="1"}
+                                <button class="layui-btn layui-btn-normal layui-btn-small onOffCate" data-id={$vo.id} style='font-size:15px;'>关闭</button>
+                            {else/}  
+                                <button class="layui-btn layui-btn-small onOffCate" data-id={$vo.id} style='font-size:15px;'>开启</button>
+                            {/neq}
+                        {php}
+                            }else{
+                        {/php}
+                            {if condition="1 eq $vo['status']"}
+                                <span style="color:green;">启用</span>
+                            {else/}
+                                <span >禁用</span>
+                            {/if}
+                        {php}
+                            }
+                        {/php}
+                    </td>
+                    <td>
+                        {php}
+                            if(showHandle('cate/Cate/webOnOffCate'))
+                            {
+                        {/php}
+                            {neq name="$vo.web_status" value="1"}
+                                <button class="layui-btn layui-btn-small layui-btn-normal webOnOffCate" data-id={$vo.id} style='font-size:15px;'>关闭</button>
+                            {else/}  
+                                <button class="layui-btn layui-btn-small webOnOffCate" data-id={$vo.id} style='font-size:15px;'>开启</button>
+                            {/neq}
+                        {php}
+                            }else{
+                        {/php}
+                            {if condition="1 eq $vo['web_status']"}
+                                <span style="color:green;">启用</span>
+                            {else/}
+                                <span >禁用</span>
+                            {/if}
+                        {php}
+                            }
+                        {/php}
+                    </td>
+                    <td>
+                        {neq name="vo.create_time" value="0000-00-00 00:00:00"}
+                            {$vo.create_time|date="Y-m-d H:i:s",###}
+                        {/neq}
+                    </td>
+                    <td>
+                        {php}
+                            if(showHandle('cate/Cate/editCate')){
+                        {/php}
+                            <button class="layui-btn layui-btn-small editCate" data-id={$vo.id} style='font-size:15px;'>编辑</button>
+                         
+                        {php}
+                            }
+                            if(showHandle('cate/Cate/delCate')){
+                        {/php}
+                           <!-- <button class="layui-btn layui-btn-small delCate" data-id={$vo.id} style='font-size:15px;'>删除</button>-->
+                        {php}
+                            }
+                        {/php}
+                    </td>
+                </tr>
+            {/volist}
+        </tbody>
+    </table>
+{/block}
+
+{block name='layer'}
+<!--添加分类start-->
+    <div id='motai' style="display:none">
+        <form id='data-form' class="layui-form" method="post" enctype="multipart/form-data">
+            <table class="layui-table">
+                <tbody>
+                    <tr>
+                        <td> <span style="color:red">*</span>父级分类</td>
+                        <td>  
+                            <select name="pid"  lay-verify="required">
+                                <option value="">--请选择--</option>
+                                <option value="0">顶级</option>
+                                {volist name="list" id="vo"}
+                                    <option value="{$vo.id}">{$vo.level|str_repeat='&nbsp;&nbsp;',###}├{$vo.name}</option>
+                                {/volist}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> <span style="color:red">*</span>分类名称</td>
+                        <td>  
+                            <input type="text"  name="name" required  lay-verify="required" placeholder="分类名称" value="" autocomplete="off" class="layui-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>排序</td>
+                        <td>
+                            <input type="text" name="sort"  placeholder="排序" value="0" autocomplete="off" class="layui-input">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan='2' style="text-align: center;">  
+                            <button class="layui-btn addCateSubmit" lay-submit lay-filter="formDemo" type="button">立即提交</button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+<!--添加分类end-->
+
+<!--编辑分类start-->
+    <div id='editmotai' style="display:none">
+        <form id='editdata-form' class="layui-form" method="post" enctype="multipart/form-data">
+            <table class="layui-table">
+                <tbody>
+                    <tr>
+                        <td> <span style="color:red">*</span>父级分类</td>
+                        <td>
+                            <select name="pid"  lay-verify="required">
+                                <option value="">--请选择--</option>
+                                <option value="0">顶级</option>
+                                {volist name="list" id="vo"}
+                                    <option value="{$vo.id}">{$vo.level|str_repeat='&nbsp;&nbsp;',###}├{$vo.name}</option>
+                                {/volist}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span style="color:red">*</span>分类名称</td>
+                        <td><input type="text"  name="name"  required  lay-verify="required" placeholder="分类名称" autocomplete="off" class="layui-input"></td>
+                    </tr>
+                    <tr>
+                        <td>排序</td>
+                        <td><input type="text" name="sort" placeholder="排序" value="0" autocomplete="off" class="layui-input"></td>
+                    </tr>
+                    <tr>
+                        <td colspan='2' style="text-align: center;">  
+                            <input type='hidden' name="id">
+                            <input type='hidden' name="action" value='post'>
+                            <button class="layui-btn editsubmit" lay-submit lay-filter="formDemo" type="button">立即提交</button>
+                            <!--<button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+<!--编辑分类end-->
+{/block}
+{block name="optJS"}
+<script> 
+    layui.use('layer', function() {
+        layui.use(['form', 'jquery', 'laypage'], function() {
+            var $ = layui.jquery, layer = layui.layer,form = layui.form();
+            //弹出添加分类模态框
+            $('.addCate').click(function() {
+                layer.open({
+                    closeBtn: 2,
+                    type: 1,
+                    area: '500px',
+                    title: '添加分类',
+                    content: $('#motai'),
+                });
+            });
+            //提交添加分类信息
+            $('.addCateSubmit').click(function() {
+                var pid = $("#data-form select[name='pid']").val();
+                var name = $("#data-form input[name='name']").val();
+                if (pid.length < 1) {
+                    layer.msg('请选择父级分类!');
+                    return false;
+                }
+                if (name.length < 1) {
+                    layer.msg('请填写分类名称');
+                    return false;
+                }
+                var From = $('#data-form').serialize();
+                layer.open({
+                    type:3,
+                    success: function(layero, index){ 
+                        $.ajax({
+                            url: "{:url('addCate')}",
+                            data: From,
+                            type: 'post',
+                            success: function(d) {
+                                var res = eval("(" + d + ")");
+                                if (res.flag == 1) {
+                                    layer.msg(res.msg,{icon:1,time:2000},function(){
+                                        layer.closeAll(); //疯狂模式，关闭所有层
+                                        window.location.reload();//刷新当前页面.
+                                    });
+                                }else{
+                                    layer.closeAll('loading'); //关闭加载层
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            //编辑分类信息
+            $('.editCate').click(function() {
+                var id = $(this).attr('data-id');
+                if (id.length<1){ return false;}
+                $.ajax({
+                    url: "{:url('editCate')}",
+                    type: 'post',
+                    data: {'id':id,'action':'get'},
+                    success: function(d) {
+                        var result = eval("(" + d + ")");
+                        if (result.flag == 1) {
+                            var data = result.data;
+                            $('#editdata-form select[name="pid"]').find("option[value='"+data.pid+"']").attr("selected",true);
+                            $('#editdata-form input[name="name"]').val(data.name);
+                            $('#editdata-form input[name="sort"]').val(data.sort);
+                            $('#editdata-form input[name="id"]').val(data.id);
+                            form.render();
+                        }else{
+                            layer.msg(result.msg,{icon:1,time:2000},function(){
+                                window.location.reload();//刷新当前页面.
+                            });
+                        }
+                        layer.open({
+                            closeBtn: 2,
+                            type: 1,
+                            area: '600px',
+                            title: '编辑分类信息',
+                            content: $('#editmotai')
+                        });
+                    }
+                });
+            });
+            //提交编辑人员信息表单
+            $('.editsubmit').click(function() {
+                var pid = $("#editdata-form select[name='pid']").val();
+                var name = $("#editdata-form input[name='name']").val();
+                if (pid.length < 1) {
+                    layer.msg('请选择父级分类!');
+                    return false;
+                }
+                if (name.length < 1) {
+                    layer.msg('请填写分类名称');
+                    return false;
+                }
+                var From = $('#editdata-form').serialize();
+                layer.open({
+                    type:3,
+                    success: function(layero, index){  
+                        $.ajax({
+                            url: "{:url('editCate')}",
+                            type: 'POST',
+                            data: From,
+                            success: function(d) {
+                                var result = eval("(" + d + ")");
+                                if (result.flag == 1) {
+                                    layer.msg(result.msg,{icon:1,time:2000},function(){
+                                        layer.closeAll(); //疯狂模式，关闭所有层
+                                        window.location.reload();//刷新当前页面.
+                                    });
+                                }else{
+                                    layer.closeAll('loading'); //关闭加载层
+                                    layer.msg(result.msg);
+                                }
+                            }
+                        });
+                    }
+                });     
+            });
+            
+            //后台开启关闭
+            $('.onOffCate').click(function(){
+                var id = $(this).attr('data-id');
+                if (id.length<1){ return false;}
+                layer.confirm('确认此操作？',function(){
+                    layer.open({
+                        type:3,
+                        success: function(layero, index){  
+                            $.ajax({
+                                url: "{:url('onOffCate')}",
+                                type: 'POST',
+                                data: {'id':id},
+                                success: function(d) {
+                                    var result = eval("(" + d + ")");
+                                    if (result.flag == 1) {
+                                        layer.msg(result.msg,{icon:1,time:2000},function(){
+                                            layer.closeAll(); //疯狂模式，关闭所有层
+                                            window.location.reload();//刷新当前页面.
+                                        });
+                                    }else{
+                                        layer.closeAll('loading'); //关闭加载层
+                                        layer.msg(result.msg);
+                                    }
+                                }
+                            });
+                        }
+                    }); 
+                });
+            });
+            //前台开启关闭
+            $('.webOnOffCate').click(function(){
+                var id = $(this).attr('data-id');
+                if (id.length<1){ return false;}
+                layer.confirm('确认此操作？',function(){
+                    layer.open({
+                        type:3,
+                        success: function(layero, index){  
+                            $.ajax({
+                                url: "{:url('webOnOffCate')}",
+                                type: 'POST',
+                                data: {'id':id},
+                                success: function(d) {
+                                    var result = eval("(" + d + ")");
+                                    if (result.flag == 1) {
+                                        layer.msg(result.msg,{icon:1,time:2000},function(){
+                                            layer.closeAll(); //疯狂模式，关闭所有层
+                                            window.location.reload();//刷新当前页面.
+                                        });
+                                    }else{
+                                        layer.closeAll('loading'); //关闭加载层
+                                        layer.msg(result.msg);
+                                    }
+                                }
+                            });
+                        }
+                    }); 
+                });
+            });
+            
+            //删除功能
+            $('.delCate').click(function(){
+                var id = $(this).attr('data-id');
+                if (id.length<1){ return false;}
+                layer.confirm('确认此操作？',function(){
+                    layer.open({
+                        type:3,
+                        success: function(layero, index){  
+                            $.ajax({
+                                url: "{:url('delCate')}",
+                                type: 'POST',
+                                data: {'id':id},
+                                success: function(d) {
+                                    var result = eval("(" + d + ")");
+                                    if (result.flag == 1) {
+                                        layer.msg(result.msg,{icon:1,time:2000},function(){
+                                            layer.closeAll(); //疯狂模式，关闭所有层
+                                            window.location.reload();//刷新当前页面.
+                                        });
+                                    }else{
+                                        layer.closeAll('loading'); //关闭加载层
+                                        layer.msg(result.msg);
+                                    }
+                                }
+                            });
+                        }
+                    }); 
+                });
+            });
+            
+            
+            
+            //tree
+            $(document).on('click', '.unfold', function() {
+                var id = $(this).data('id'),obj = $(this);
+                $('tr[data-id="'+id+'"]').toggle();
+                if (!$('tr[data-id="'+id+'"]').is(':hidden')) {
+                    obj.html('&#xe61a;');
+                } else {
+                    obj.html('&#xe602;');
+                }
+            });
+            
+        });
+    });
+</script>
+{/block}

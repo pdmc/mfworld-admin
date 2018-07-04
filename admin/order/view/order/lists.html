@@ -1,0 +1,138 @@
+{extend name="extra@main"/}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">订单</a>
+            <a><cite>订单列表</cite></a>
+        </span>
+    </div>
+    <form class="layui-form" action="{:url('Order/lists')}" method="get" style="margin-top:10px;float:left;margin-bottom: -16px;">
+        <div class="layui-form-item" style="margin-left:5px;">
+            <div class="layui-inline">
+                <select name="order_status" lay-verify="required">
+                    <option value="0">--支付状态--</option>
+                    <option value="1" {eq name="$Think.get.order_status" value="1"}selected{/eq}>未支付</option>
+                    <option value="2" {eq name="$Think.get.order_status" value="2"}selected{/eq}>已支付</option>
+                </select>
+            </div>
+            <div class="layui-inline">
+                <input type="text"  name="order_id" placeholder="订单号" value="{$Think.get.order_id}" class="layui-input">
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn">查找</button>
+            </div>
+        </div>
+    </form>
+    <table lay-even class="layui-table" style="margin-top:-16px;">
+        <thead>
+            <tr> 
+                <th style='width:20%;'>订单号</th>
+                <th style='width:10%;'>用户姓名</th>
+                <th style='width:10%;'>支付金额</th>
+                <th style='width:10%;'>支付方式</th>
+                <th style='width:10%;'>支付状态</th>
+                <th style='width:15%;'>支付时间</th>
+                <th style='width:15%;'>创建时间</th>
+                <th style='width:10%;'>操作</th>
+            </tr> 
+        </thead>
+        <tbody>
+            {volist name="list" id="vo"}
+                <tr>
+                    <td>{$vo.order_id}</td>
+                    <td>{$vo.user_name}</td>
+                    <td>{$vo.order_price}</td>  
+                    <td>
+                        {if condition="1 eq $vo['pay_type']"}
+                            <span>支付宝</span>
+                        {elseif condition="2 eq $vo['pay_type']"/}
+                            <span>微信</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {if condition="1 eq $vo['order_status']"}
+                            <span>未支付</span>
+                        {elseif condition="2 eq $vo['order_status']"/}
+                            <span>已支付</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {neq name="vo.pay_time" value="0000-00-00 00:00:00"}
+                            {$vo.pay_time}
+                        {/neq}
+                    </td>
+                    <td>
+                        {neq name="vo.order_time" value="0000-00-00 00:00:00"}
+                            {$vo.order_time}
+                        {/neq}
+                    </td>
+                    <td>
+                        {php}
+                            if(showHandle('order/Order/viewmore')){
+                        {/php}
+                            <button class="layui-btn layui-btn-small view" data-id={$vo.id} style='font-size:15px;'>查看更多</button>
+                        {php}
+                            }
+                        {/php}
+                    </td>
+                </tr>
+            {/volist}
+        </tbody>
+    </table>
+    {$page}
+{/block}
+
+{block name='layer'}
+<!--查看更多start-->
+    <div id='motai' style="display:none">
+        <form id='data-form' class="layui-form" method="post" enctype="multipart/form-data">
+            <table class="layui-table">
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </form>
+    </div>
+<!--查看更多end-->
+{/block}
+{block name="optJS"}
+<script> 
+    layui.use('layer', function() {
+        layui.use(['form', 'jquery', 'laypage'], function() {
+            var $ = layui.jquery, layer = layui.layer,form = layui.form();
+            //查看更多
+            $('.view').click(function() {
+                var id = $(this).attr('data-id');
+                if (id.length<1){ return false;}
+                $.ajax({
+                    url: "{:url('viewmore')}",
+                    type: 'post',
+                    data: {'id':id},
+                    success: function(d) {
+                        var result = eval("(" + d + ")");
+                        if (result.code == 200) {
+                            var data = result.data,str;
+                            str = "<tr><th width='8%'>道具ID</th><th  width='18%'>名称</th><th  width='8%'>数量</th></tr>"
+                            for(var i=0; i<data.length; i++){
+                                str += '<tr><td>'+data[i]['id']+'</td><td>'+data[i]['name']+'</td><td>'+data[i]['num']+'</td></tr>'
+                            }
+                            $('#data-form tbody').empty().html(str);
+                            form.render();
+                            layer.open({
+                                closeBtn: 2,
+                                type: 1,
+                                area: '450px',
+                                title: '查看更多',
+                                content: $('#motai')
+                            });
+                        }else{
+                            layer.msg(result.msg);
+                            window.location.reload();//刷新当前页面.
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>
+{/block}
