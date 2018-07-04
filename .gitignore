@@ -1,11 +1,7 @@
-assets/*
-!assets/.gitignore
-protected/runtime/*
-!protected/runtime/.gitignore
-protected/data/*.db
-themes/classic/views/
-
 /runtime/
 /nbproject/
-config.php
-database.php
+/admin/config.php
+/admin/database.php
+/public/uploads/
+/thinkphp/*
+/vendor/*
