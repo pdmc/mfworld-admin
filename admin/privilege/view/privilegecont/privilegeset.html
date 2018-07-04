@@ -1,0 +1,162 @@
+{extend name='extra@main' /}
+{block name='body'}
+<div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+    <span class="layui-breadcrumb" style="font-size:20px">
+        <a href="javascript:;">权限</a>
+        <a href="javascript:;">权限划分</a>
+        <a><cite>权限分配</cite></a>
+    </span>
+</div>
+<form action="{:url('Privilegecont/privilegeset')}" method="post" class="layui-form" >
+    <input name="id" type="hidden" value="{$id}">
+    <div class="layui-tab layui-tab-card">
+        <ul class="layui-tab-title" style='float:left;margin-left:10px;'>
+            {volist name="first_privilege" id="vo" key="k"}
+                <li {if condition="$k eq 1"}class="layui-this"{/if} class="layui-nav-item"><a href="#node-{$vo.id}" data-toggle="tab">{$vo.title}</a></li>
+            {/volist}
+        </ul>
+        <div class="layui-tab-content">
+            {volist name='privilegeTree' id='v' key='k'}
+                <div class='layui-tab-item {if condition="$k eq 1"}layui-show{/if}' id="node-{$v.id}">
+                    <table class="layui-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="15%"><input type="checkbox" name="rules[]" value="<?= $v['id'] ?>" lay-skin="primary" lay-filter="rule-chkall" class="rule-chkall"  <?php if(in_array($v['id'], $role)):?> checked="checked" <?php endif;?> />{$v.title}</th>
+                                <th> <span>操作</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {volist name="v['child']" id="one"}
+                                <tr>
+                                    <td class="one-{$v['id']}">
+                                        <input type="checkbox" lay-skin="primary" name="rules[]" class="level1" lay-filter="level1" data-node="<?= $v['id']?>" value="<?= $one['id'] ?>" <?php if(in_array($one['id'], $role)):?> checked="checked" <?php endif;?>> {$one.title}
+                                    </td>
+                                    <td class="layui-tablenoborder child-{$one['id']}">
+                                        {volist name="one['child']" id="two"}
+                                            <input type="checkbox" lay-skin="primary" name="rules[]" data-pid="{$one['id']}"  data-node="{$v['id']}" lay-filter="level2" class="level2" value="{$two['id']}" <?php if(in_array($two['id'], $role)):?> checked="checked" <?php endif;?>> {$two.title}
+                                        {/volist}
+                                    </td>
+                                </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                </div>
+            {/volist}
+        </div>
+    </div>
+    <div class="layui-input-block">
+        <button type="submit" class="layui-btn sub-btn submit">提交</button>
+    </div>
+</form>
+{/block}
+
+{block name="optJS"}
+<script>
+    layui.use(['form', 'jquery', 'layer'],function(){
+        var $ = layui.jquery;
+        var form = layui.form();
+        var layer = layui.layer;
+
+        //(顶级)一级菜单 
+        form.on('checkbox(rule-chkall)', function(data){
+            if (!$(this).is(':checked')) {
+                $('#node-' + $(this).val() + ' input[type="checkbox"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+            } else {
+                $('#node-' + $(this).val() + ' input[type="checkbox"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+            }
+            form.render('checkbox');
+        });
+        //一级菜单 
+        form.on('checkbox(level1)', function(data){
+            var id = $(this).val();//data.value;
+            var node = $(this).attr('data-node');
+            if ($(this).is(':checked')) {
+                $('.child-' + id + ' input[type="checkbox"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                $('#node-' + node + ' input[value="' + node + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+            } else {
+                $('.child-' + id + ' input[type="checkbox"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                if (isChecked('one-' + node)) {
+                    $('#node-' + node + ' input[value="' + node + '"]').each(function(index, item){
+                        item.checked = data.elem.checked;
+                    });
+                }
+            }
+            form.render('checkbox');
+        });
+        //二级菜单
+        form.on('checkbox(level2)', function(data){
+            var id = $(this).val();
+            var node = $(this).attr('data-node');
+            var pid = $(this).attr('data-pid');
+            if ($(this).is(':checked')) {
+                $('input[data-pid="' + id + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                $('input[value="' + node + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                $('input[value="' + pid + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+            } else {
+                $('input[data-pid="' + id + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+               /* if (isChecked('two-' + pid)) {
+                    $('input[value="' + pid + '"]').each(function(index, item){
+                        item.checked = data.elem.checked;
+                    });
+                    if (isChecked('one-' + node)) {
+                        $('input[value="' + node + '"]').each(function(index, item){
+                            item.checked = data.elem.checked;
+                        });
+                    }
+                }*/
+            }
+            form.render('checkbox');
+        });
+        
+        //三级菜单
+        form.on('checkbox(level3)', function(data){
+            var node = $(this).attr('data-node');
+            var pid = $(this).attr('data-pid');
+            var ppid = $(this).attr('data-ppid');
+            
+            if ($(this).is(':checked')) {
+                $('input[value="' + ppid + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                $('input[value="' + node + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+                $('input[value="' + pid + '"]').each(function(index, item){
+                    item.checked = data.elem.checked;
+                });
+            } 
+            form.render('checkbox');
+        });
+        function isChecked(cla) {
+            var list = $('.' + cla + ' input[type="checkbox"]');
+            var len = list.length;
+            if (len > 0) {
+                for (var i = 0; i < len; i++) {
+                    if ($(list[i]).is(':checked')) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    });
+</script>
+{/block}

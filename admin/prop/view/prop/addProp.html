@@ -1,0 +1,195 @@
+{extend name="extra@main"/}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">道具</a>
+            <a href="{:url('Prop/lists')}">道具列表</a>
+            <a><cite>添加道具</cite></a>
+        </span>
+    </div>
+    <form class="layui-form layui-form-pane1" method="post" action="{:url('prop/Prop/addProp')}" style="width:600px;"  enctype="multipart/form-data">
+        <table class="layui-table" style="margin:16px 0px 0px 160px">
+            <tbody>
+                <tr>
+                    <td><span style="color:red">*</span>道具类型:</td>
+                    <td>
+                        <select name="prop_type" lay-verify="required" lay-filter="prop_type">
+                            {volist name="Think.config.prop_type" id="vo"}
+                                <option value="{$key}">{$vo}</option>
+                            {/volist}
+                        </select>
+                    </td>
+                </tr>
+                <tr class='mult' style='display:none;'><td></td><td class='incon'></td></tr>
+                <!--<tr>
+                    <td><span style="color:red">*</span>道具图片:</td>
+                    <td>
+                        <div class="layui-box layui-upload-button layui-input-inline">
+                            <input type="file" name="image" lay-type="images" class="layui-upload-file"  lay-verify="required" required />
+                            <span class="layui-upload-icon"><i class="layui-icon"> </i>上传图片</span>
+                        </div>
+                    </td>
+                </tr> -->
+                <tr>
+                    <td><span style="color:red">*</span>道具图片:</td>
+                    <td>
+                        <div class="layui-box  layui-input-inline">
+                            <input type="file" name="image"  lay-type="images" lay-verify="required" required />
+                        </div>
+                    </td>
+                </tr> 
+                <tr>
+                    <td><span style="color:red">*</span>道具名称:</td>
+                    <td>
+                        <input type="text"  name="name" autocomplete="off" placeholder="道具名称"  lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>道具价格:</td>
+                    <td>
+                        <input type="text"  name="price" autocomplete="off" placeholder="道具价格"  lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>道具说明:</td>
+                    <td>
+                        <textarea rows="3" cols="60" name="describe"  lay-verify="required"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:red">*</span>道具数值:</td>
+                    <td>
+                        <input type="text"  name="propnum" autocomplete="off" placeholder="道具数量" lay-verify="required" class="layui-input">
+                    </td>
+                </tr>
+                <tr class='single'>
+                    <td><span style="color:red">*</span>使用方式:</td>
+                    <td>
+                        <select name="use_type" lay-verify="required">
+                            <option value="1">持续使用</option>
+                            <option value="2">立即使用</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class='single'>
+                    <td>持续时间:</td>
+                    <td>
+                        <input type="text"  name="keep_time" autocomplete="off"  placeholder="单位分钟" class="layui-input">
+                    </td>
+                </tr>
+                <tr class='single'>
+                    <td>冷却时间:</td>
+                    <td>
+                        <input type="text"  name="cool_time" autocomplete="off"  placeholder="单位分钟" class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td>排&nbsp &nbsp &nbsp &nbsp序:</td>
+                    <td>
+                        <input type="text"  name="sort" autocomplete="off" placeholder="排序" value='0' class="layui-input">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2' style="text-align: center;">  
+                        <button class="layui-btn" lay-submit="" lay-filter="demo1">提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+{/block}
+
+{block name='layer'}
+<!--添加单品start-->
+    <div id='motai' style="display:none">
+        <form id='data-form' class="layui-form" method="post">
+            <table class="layui-table">
+                <tbody name='tbody'>
+                    
+                </tbody>
+                <tr>
+                    <td style="text-align:center;">  
+                        <button class="layui-btn addSubmit" lay-submit lay-filter="formDemo" type="button">确定</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+<!--添加单品end-->
+{/block}
+{block name="optJS"}
+<script> 
+    layui.use('layer', function() {
+        layui.use(['form', 'jquery', 'laypage'], function() {
+            var $ = layui.jquery, layer = layui.layer,form = layui.form();
+            //改变道具类型
+            form.on('select(prop_type)', function(data) {
+                var type = data['value'];
+                if(type == '1'){
+                    $('.mult').hide();
+                    $('.single').show();
+                }
+                if(type == '2'){
+                    layer.open({
+                        type:3,
+                        success: function(layero, index){  
+                            $.ajax({
+                                url: "{:url('selProp')}",
+                                type: 'POST',
+                                success: function(d) {
+                                    var result = eval("(" + d + ")");
+                                    if (result.flag == 1) {
+                                        var data = result.data;
+                                        var string = '',i=1;
+                                        $.each(data, function(key, val) {
+                                            string += '<input type="checkbox"  name="like' +key+ ']" value="' +key+ '"  title="'+val+'">';
+                                            if(i%5 == 0){
+                                                string += '<br/><br/>';
+                                            }
+                                            ++i;
+                                        });
+                                        layer.open({
+                                            closeBtn: 2,
+                                            type: 1,
+                                            area: '650px',
+                                            title: '选择单品',
+                                            content: $('#motai')
+                                        });
+                                        if(string){
+                                            $("#data-form tbody[name='tbody']").empty().append(string);
+                                        }
+                                        form.render();
+                                        layer.closeAll('loading'); //关闭加载层
+                                    }else{
+                                        layer.closeAll('loading'); //关闭加载层
+                                        layer.msg(result.msg);
+                                    }
+                                }
+                            });
+                        }
+                    });  
+                }
+            });
+            
+            $('.addSubmit').click(function(){
+                form.render();
+                var string = '';
+                $("#data-form tbody input").each(function(i){
+                    if($(this).is(':checked')){
+                        string +="<input type='text' class='layui-input' style='width:20%;float:left;' disabled value='"+$(this).attr('title')+"'><input type='hidden' name='sid[]' value='"+$(this).attr('value')+"'><input type='text' name='snum[]' value='1' style='width:20%;float:left;' class='layui-input'><br/><br/>";
+                    }
+                });
+                if(string){
+                    $(".incon").empty().append(string);
+                }
+                $('.single').hide();
+                $('.mult').show();
+                form.render();
+                layer.closeAll();//关闭加载层
+            });
+            
+        });
+    });
+</script>
+{/block}
