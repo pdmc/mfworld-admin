@@ -1,0 +1,60 @@
+{extend name="extra@main"/}
+{block name="body"}
+    <div style="width:100%;height:50px;border-bottom:1px solid #E2E2E2;line-height:50px;padding-left:30px;">
+        <span class="layui-breadcrumb" style="font-size:20px">
+            <a href="javascript:;">权限</a>
+            <a><cite>登录列表</cite></a>
+        </span>
+    </div>
+    <form class="layui-form" action="{:url('Admin/viewlog')}" method="get" style="margin-top:10px;float:left;margin-bottom: -16px;">
+        <div class="layui-form-item" style="margin-left:5px;">
+            <div class="layui-inline">
+                <input type="text"  name="client_name" placeholder="用户昵称" value="{$Think.get.client_name}" class="layui-input">
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn">查找</button>
+            </div>
+        </div>
+    </form>
+    <table lay-even class="layui-table" style="margin-top:-16px;">
+        <thead>
+            <tr> 
+                <th style='width:10%;'>ID</th>
+                <th style='width:15%;'>用户昵称</th>
+                <th style='width:25%;'>登录IP</th>
+                <th style='width:25%;'>登录时间</th>
+                <th style='width:10%;'>登录终端</th>
+            </tr> 
+        </thead>
+        <tbody>
+            {volist name="list" id="vo"}
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.client_name}</td>
+                    <td>{$vo.login_ip}</td>
+                    <td>{$vo.login_time}</td>
+                    <td>
+                        {if condition="1 eq $vo['login_agent']"}
+                            <span>H5</span>
+                        {elseif condition="2 eq $vo['login_agent']"/}
+                            <span>未定</span>
+                        {else/}
+                            <span>其他</span>
+                        {/if}
+                    </td>
+                </tr>
+            {/volist}
+        </tbody>
+    </table>
+    {$page}
+{/block}
+
+{block name="optJS"}
+<script> 
+    layui.use('layer', function() {
+        layui.use(['form', 'jquery', 'laypage'], function() {
+            var $ = layui.jquery, layer = layui.layer,form = layui.form();
+        });
+    });
+</script>
+{/block}
